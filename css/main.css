@@ -120,6 +120,8 @@ header {
   align-items: center;
 }
 
+
+
 @media screen and (min-width: 20rem) {
   .title-container {
     margin-left: 1.5rem;
