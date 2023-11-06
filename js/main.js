@@ -26,7 +26,7 @@ function init() {
     } 
   });
 
-    // Agregar evento de cambio al elemento regionSelect
+    // Evento change para el selector
     regionSelect.addEventListener("change", selectRegion);
 }
 
@@ -36,7 +36,7 @@ window.onload = init();
 async function searchCountry(countryName) {
   const urlName = `https://restcountries.com/v3.1/name/${countryName}`;
   const response = await fetch(urlName);
-  const countries = await response.json();
+  countries = await response.json();
   updateCountryCards(countries);
 }
 
@@ -91,7 +91,5 @@ function selectRegion(){
   if(selectedRegion){
     const filteredCountries = countries.filter(country => country.region === selectedRegion);
     updateCountryCards(filteredCountries);
-  }else{
-    getAllCountries();
   }
 }
