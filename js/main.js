@@ -1,65 +1,57 @@
-
 let btnToggleDarkMode = document.querySelector("#btn-toggle-dark-mode");
 const inputSearch = document.getElementById("input-field-country");
 const countriesBox = document.getElementById("countries-selection-box");
 const regionSelect = document.getElementById("regionSelect");
 let countries;
 
-
+//Función dark mode
 function toggleDarkMode() {
   document.querySelector("html").classList.toggle("dark-mode");
   btnToggleDarkMode.children[0].classList.toggle("bi-moon");
   btnToggleDarkMode.children[0].classList.toggle("bi-moon-fill");
 }
 
-//Función inicial que arranca la página
-function init() {
+//Función inicial 
+async function init() {
   btnToggleDarkMode.addEventListener("click", toggleDarkMode);
 
-  getAllCountries();
-
-  //Evento Input 
-  inputSearch.addEventListener("input", async(event) => {
-    const searchTerm = event.target.value;
-    if (searchTerm.length > 0) {
-      searchCountry(searchTerm);
-    } 
-  });
-
-    // Evento change para el selector
-    regionSelect.addEventListener("change", selectRegion);
+  await getAllCountries();
+  
+  inputSearch.addEventListener("input", handleSearch);
+  regionSelect.addEventListener("change", handleSearch);
 }
 
-window.onload = init();
-
-//Función se añade una country en el input y se busca, llama a la función actualizar la página 
-async function searchCountry(countryName) {
-  const urlName = `https://restcountries.com/v3.1/name/${countryName}`;
-  const response = await fetch(urlName);
+//Función fetch y llamamos la función para pintar las cards
+async function getAllCountries() {
+  const url = "https://restcountries.com/v3.1/all";
+  const response = await fetch(url);
   countries = await response.json();
   updateCountryCards(countries);
 }
 
-//Limpia la pag y actualiza la tarjetas
-function updateCountryCards(countriesData) {
-  countriesBox.innerHTML = ""; // Limpiar las tarjetas existentes antes de mostrar nuevas tarjetas
+//Función que une el input y el select dependiendo de lo que pone el usuario
+function handleSearch() {
+  const searchTerm = inputSearch.value;
+  const selectedRegion = regionSelect.value;
+  const filteredCountries = countries.filter(country => {
+    const matchesSearch = country.name.official.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRegion = selectedRegion === "" || country.region === selectedRegion;
+    return matchesSearch && matchesRegion;
+  });
+  updateCountryCards(filteredCountries);
+}
 
-  countriesData.forEach(countrie => {
-    paintCountrie(countrie);
+//Función coge datos y pone las cards
+function updateCountryCards(countriesData) {
+  countriesBox.innerHTML = "";
+  countriesData.forEach(country => {
+    paintCountry(country);
   });
 }
 
-//Función fetch mostrar todas las tarjetas
-async function getAllCountries(){
-  const url = "https://restcountries.com/v3.1/all";
 
-  const response = await fetch(url);
-  countries = await response.json(); 
-  updateCountryCards(countries); // Llama a la función de actualización después de obtener los países
-}
-
-//Función card del país para crear las tarjetas
-function paintCountrie(countrieData) {
+//Función crear tarjetas 
+function paintCountry(countrieData) {
   const countriesBox = document.getElementById("countries-selection-box");
 
   const countryCard = document.createElement("article");
@@ -85,11 +77,4 @@ function paintCountrie(countrieData) {
   countriesBox.appendChild(countryCard);
 }
 
-//Función para filtar en el select
-function selectRegion(){
-  const selectedRegion = regionSelect.value;
-  if(selectedRegion){
-    const filteredCountries = countries.filter(country => country.region === selectedRegion);
-    updateCountryCards(filteredCountries);
-  }
-}
+window.onload = init;
